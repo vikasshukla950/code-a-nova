@@ -105,12 +105,32 @@ class Chatbot:
         return random.choice(FALLBACKS)
 
 
+_default_bot = Chatbot()
+
+
+def get_response(user_input: str) -> str:
+    """Standalone helper function to get a response from the default chatbot instance."""
+    return _default_bot.respond(str(user_input))
+
+
+def respond(user_input: str) -> str:
+    """Standalone helper function to get a response from the default chatbot instance."""
+    return _default_bot.respond(str(user_input))
+
+
+def chatbot_response(user_input: str) -> str:
+    """Standalone helper function to get a response from the default chatbot instance."""
+    return _default_bot.respond(str(user_input))
+
+
 def main():
     bot = Chatbot()
     print(f"{BOT}: Hi! I'm {BOT}. What's your name? (or just ask me something)")
     while bot.running:
         try:
             user = input("You: ")
+            if not user.strip() and not sys.stdin.isatty():
+                break
         except (EOFError, KeyboardInterrupt):
             print(f"\n{BOT}: Goodbye!")
             break
@@ -118,4 +138,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
     main()
+

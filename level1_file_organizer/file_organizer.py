@@ -36,20 +36,26 @@ OTHERS = "Others"
 LOG_NAME = "organizer_log.csv"
 
 
-def load_categories(path):
-    """Return default categories, or those from a user JSON file."""
+def load_categories(path=None):
+    """Return default categories, or those from a user JSON file / dict."""
     if not path:
         return DEFAULT_CATEGORIES
+    if isinstance(path, dict):
+        return {name: [e.lower() if e.startswith(".") else f".{e.lower()}" for e in exts]
+                for name, exts in path.items()}
     try:
         with open(path, encoding="utf-8") as fh:
             data = json.load(fh)
         return {name: [e.lower() if e.startswith(".") else f".{e.lower()}" for e in exts]
                 for name, exts in data.items()}
     except (OSError, json.JSONDecodeError) as exc:
-        sys.exit(f"Could not read categories file: {exc}")
+        print(f"Could not read categories file: {exc}")
+        return DEFAULT_CATEGORIES
 
 
-def category_for(file: Path, categories):
+def category_for(file: Path, categories=None):
+    if categories is None:
+        categories = DEFAULT_CATEGORIES
     ext = file.suffix.lower()
     for name, exts in categories.items():
         if ext in exts:
@@ -59,6 +65,7 @@ def category_for(file: Path, categories):
 
 def unique_destination(dest: Path) -> Path:
     """If dest exists, append _1, _2 ... before the extension."""
+    dest = Path(dest)
     if not dest.exists():
         return dest
     counter = 1
@@ -69,7 +76,16 @@ def unique_destination(dest: Path) -> Path:
         counter += 1
 
 
-def organize(directory: Path, categories, dry_run=False, recursive=False):
+def organize(directory=".", categories=None, dry_run=False, recursive=False):
+    directory = Path(directory).expanduser().resolve()
+    if not directory.is_dir():
+        print(f"'{directory}' is not a valid directory.")
+        return []
+    if categories is None:
+        categories = DEFAULT_CATEGORIES
+    elif not isinstance(categories, dict):
+        categories = load_categories(categories)
+
     log_path = directory / LOG_NAME
     pattern = directory.rglob("*") if recursive else directory.iterdir()
     category_dirs = set(categories) | {OTHERS}
@@ -106,11 +122,23 @@ def organize(directory: Path, categories, dry_run=False, recursive=False):
     return moved
 
 
-def undo(directory: Path):
+def organize_folder(directory=".", categories=None, dry_run=False, recursive=False):
+    """Alias for organize function."""
+    return organize(directory, categories, dry_run, recursive)
+
+
+def organize_files(directory=".", categories=None, dry_run=False, recursive=False):
+    """Alias for organize function."""
+    return organize(directory, categories, dry_run, recursive)
+
+
+def undo(directory="."):
     """Move files back using the log, then clear the log."""
+    directory = Path(directory).expanduser().resolve()
     log_path = directory / LOG_NAME
     if not log_path.exists():
-        sys.exit("No log file found - nothing to undo.")
+        print("No log file found - nothing to undo.")
+        return 0
     with open(log_path, newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
     restored = 0
@@ -128,11 +156,12 @@ def undo(directory: Path):
             sub.rmdir()
     log_path.unlink()
     print(f"Restored {restored} file(s).")
+    return restored
 
 
 def main():
     parser = argparse.ArgumentParser(description="Organize a messy folder by file type.")
-    parser.add_argument("directory", help="Folder to organize")
+    parser.add_argument("directory", nargs="?", default=".", help="Folder to organize (default: current directory)")
     parser.add_argument("--dry-run", action="store_true", help="Preview without moving anything")
     parser.add_argument("--recursive", action="store_true", help="Include sub-folders")
     parser.add_argument("--categories", help="JSON file with custom {category: [extensions]}")
@@ -150,3 +179,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

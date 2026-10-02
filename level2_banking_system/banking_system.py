@@ -173,16 +173,26 @@ class Bank:
 # ---------------- console UI ----------------
 def ask_pin(prompt="PIN: "):
     try:
-        return getpass.getpass(prompt)
-    except Exception:
+        if sys.stdin and sys.stdin.isatty():
+            return getpass.getpass(prompt)
         return input(prompt)
+    except Exception:
+        try:
+            return input(prompt)
+        except Exception:
+            return "0000"
 
 
 def account_menu(bank, acc):
     print(f"\nWelcome, {acc.holder}!")
     while True:
         print("\n1.Balance  2.Deposit  3.Withdraw  4.Transfer  5.History  6.Logout")
-        choice = input("Choose: ").strip()
+        try:
+            choice = input("Choose: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            return
+        if not choice:
+            return
         try:
             if choice == "1":
                 print(f"Balance: {acc.balance}")
@@ -210,7 +220,13 @@ def main():
         raise SystemExit(exc)
     while True:
         print("\n=== SIMPLE BANK ===\n1.Create account  2.Login  3.Exit")
-        choice = input("Choose: ").strip()
+        try:
+            choice = input("Choose: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nThank you for banking with us.")
+            break
+        if not choice:
+            break
         try:
             if choice == "1":
                 name = input("Full name: ")
@@ -233,4 +249,6 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
     main()
+
