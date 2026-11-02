@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}Crave — Find your next favorite{% endblock %}
+{% block content %}
+<section class="hero"><div class="hero-copy"><p class="eyebrow">YOUR NEIGHBORHOOD, SERVED</p><h1>Good food.<br><em>Good mood.</em></h1><p class="hero-sub">A little something delicious is closer than you think.</p>
+  <form class="search" action="{{ url_for('home') }}"><span>⌕</span><input name="q" value="{{ query }}" placeholder="Search restaurants or cuisines"><button>Find food</button></form>
+  <div class="hero-meta"><span>✦ 4.8 average rating</span><span>◷ Quick local delivery</span></div>
+  </div><div class="hero-art"><div class="plate">🍜</div><span class="art-spark one">✳</span><span class="art-spark two">✦</span><div class="art-note">made with<br><strong>a little love</strong></div></div>
+</section>
+<section class="section"><div class="section-head"><div><p class="eyebrow">THE GOOD STUFF</p><h2>Restaurants near you</h2></div><form action="{{ url_for('home') }}" class="filter"><select name="cuisine" onchange="this.form.submit()"><option value="">All cuisines</option>{% for item in cuisines %}<option value="{{ item }}" {% if request.args.get('cuisine') == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></form></div>
+{% if restaurants %}<div class="restaurant-grid">{% for place in restaurants %}<a class="restaurant-card" href="{{ url_for('restaurant', restaurant_id=place.id) }}"><div class="food-art {{ place.color }}"><span>{{ place.emoji }}</span><b class="rating">★ {{ place.rating }}</b><small class="food-label">FRESH TODAY</small></div><div class="card-info"><div><h3>{{ place.name }}</h3><p>{{ place.cuisine }} · {{ place.time }}</p></div><span class="arrow">↗</span></div></a>{% endfor %}</div>{% else %}<div class="empty"><span>🔎</span><h3>No kitchens found</h3><p>Try another name or cuisine.</p><a href="{{ url_for('home') }}" class="text-link">See all restaurants →</a></div>{% endif %}</section>
+<section class="promise"><span>✦</span><div><strong>Made for the moment</strong><p>Handpicked local kitchens. Real ingredients. Delivered with care.</p></div><a href="#" onclick="return false">A better kind of takeout <b>↗</b></a></section>
+{% endblock %}

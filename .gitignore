@@ -1,6 +1,10 @@
 __pycache__/
-*.pyc
-bank_data.json
-organizer_log.csv
+*.py[cod]
+.venv/
+venv/
+instance/
+food_delivery.db
+*.sqlite3
+.env
 .vscode/
 .DS_Store

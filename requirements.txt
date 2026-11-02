@@ -1,3 +1,1 @@
-# CODE-A-NOVA Python Development Internship
-# All projects use standard Python libraries.
-# Minimum Python Version: 3.8+
+Flask>=3.0,<4.0

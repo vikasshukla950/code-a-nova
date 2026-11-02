@@ -1,8 +1,0 @@
-# Sample list for url_status_checker.py  (lines starting with # are ignored)
-google.com
-github.com
-https://www.python.org
-https://pypi.org
-stackoverflow.com
-wikipedia.org
-this-site-does-not-exist-12345.com
